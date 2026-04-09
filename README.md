@@ -30,7 +30,8 @@ sudo docker run -it --rm --net=host netscan 192.168.1.0/24
 
 Для запуска сканера напрямую в ОС Windows (без Docker) выполните следующие шаги:
 Установка драйвера: Скачайте и установите Npcap (https://npcap.com). 
-   > Важно: При установке выберите опцию "Install Npcap in WinPcap API-compatible Mode".<
+   > Важно: При установке выберите опцию "Install Npcap in WinPcap API-compatible Mode".
+
 Клонирование и установка:
 ```powershell
 git clone https://github.com
