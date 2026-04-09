@@ -19,21 +19,22 @@ NetScout — современный высокопроизводительный
 Это самый простой способ запустить сканер, не устанавливая зависимости в систему:
 
 Сборка образа
+```bash
 sudo docker build -t netscan .
-
+```
 Запуск сканирования (замените диапазон на свой)
+```bash
 sudo docker run -it --rm --net=host netscan 192.168.1.0/24
-
+```
 Запуск на Windows 
 
 Для запуска сканера напрямую в ОС Windows (без Docker) выполните следующие шаги:
-
-1. Установка драйвера: Скачайте и установите Npcap (https://npcap.com). 
+Установка драйвера: Скачайте и установите Npcap (https://npcap.com). 
    > Важно: При установке выберите опцию "Install Npcap in WinPcap API-compatible Mode".
-2. Клонирование и установка:
-   powershell
-   git clone https://github.com
-   cd network-scanner
-   python -m poetry install
-   python -m poetry run netscan 192.168.1.0/24
-
+Клонирование и установка:
+```powershell
+git clone https://github.com
+cd network-scanner
+python -m poetry install
+python -m poetry run netscan 192.168.1.0/24
+```
