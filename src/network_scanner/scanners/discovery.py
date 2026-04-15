@@ -5,7 +5,7 @@ from typing import List
 from ..core.models import Host
 from ..utils.mac_vendor import get_vendor
 
-def arp_scan(target_ip: str, timeout: int = 3, interface: str = None) -> List[Host]:
+def arp_scan(target_ip: str, timeout: int = 5, interface: str = None) -> List[Host]:
     """
        Performs an ARP scan of the subnet.
               The fastest and most reliable way to detect devices 
@@ -22,7 +22,7 @@ def arp_scan(target_ip: str, timeout: int = 3, interface: str = None) -> List[Ho
     #Send packets and wait for responses
     with Progress() as progress:
         task = progress.add_task("[cyan]Scanning...", total=100)
-        answered, _ = srp(packet, timeout=timeout, iface=interface, verbose=False)
+        answered, _ = srp(packet, timeout=timeout, iface=interface, verbose=False, inter=0.1)
         progress.update(task, advance=100)
 
     for _, received in answered:
