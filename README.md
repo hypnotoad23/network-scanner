@@ -48,5 +48,5 @@ sudo docker run -it --rm --net=host netscan 192.168.1.0/24
 git clone https://github.com/hypnotoad23/network-scanner
 cd network-scanner
 python -m poetry install
-python -m poetry run netscan 192.168.1.0/24
+python -m poetry run netscan 192.168.3.0/24 -i "Ваше_Имя_Адаптера"
 ```
