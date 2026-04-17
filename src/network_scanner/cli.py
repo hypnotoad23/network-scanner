@@ -3,8 +3,6 @@ from rich.console import Console
 from rich.table import Table
 import time
 
-from rich.console import  Console
-
 from network_scanner.core import Host, ScanResult
 from network_scanner.scanners import arp_scan
 
