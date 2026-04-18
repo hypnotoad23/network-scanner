@@ -33,11 +33,11 @@ def main():
         )
         
         #Create table
-        table = Table(title="Detected devices on the network")
-        table.add_column("IP", style="cyan", width=16) 
-        table.add_column("MAC", style="magenta", width=19)
-        table.add_column("Vendor", style="blue", width=25, overflow="ellipsis")
-        table.add_column("OS Guess", style="green", width=15)
+        table = Table(title="Detected devices on the network", expand=False)
+        table.add_column("IP", style="cyan", no_wrap=True) 
+        table.add_column("MAC", style="magenta",no_wrap-True)
+        table.add_column("Vendor", style="spring_green3", width=25, overflow="fold")
+        table.add_column("OS Guess", style="gold3")
 
         for host in result.hosts:
             table.add_row(
