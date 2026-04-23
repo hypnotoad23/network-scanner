@@ -24,8 +24,8 @@ def arp_scan(target_ip: str, timeout: int = 5) -> List[Host]:
 
     #Send packets and wait for responses
     with Progress() as progress:
-        task = progress.add_task("[cyan]Scanning...", total=100)
-        answered, _ = arping(target_ip, timeout=timeout, verbose=False, inter=0.1)
+        task = progress.add_task("[cyan]Scanning...", total=None)
+        answered, _ = srp(target_ip, timeout=timeout, verbose=False, inter=0.1)
         progress.update(task, advance=100)
 
     for _, received in answered:
