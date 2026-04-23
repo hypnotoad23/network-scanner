@@ -9,6 +9,7 @@ from network_scanner.scanners import arp_scan
 console = Console()
 
 def main():
+    """Run a network scan"""
     parser = argparse.ArgumentParser(description="Network Scanner CLI")
     parser.add_argument("network", help="Network range to scan (e.g., 192.168.1.0/24)")
     parser.add_argument("-t", "--timeout", type=int, default=3)
@@ -16,7 +17,6 @@ def main():
 
     args = parser.parse_args()
 
-    """Run a network scan"""
     console.print(f"[bold green] Run a network scan {args.network}...[/bold green]")
     start_time = time.time()
     
