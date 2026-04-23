@@ -13,7 +13,6 @@ def main():
     parser.add_argument("network", help="Network range to scan (e.g., 192.168.1.0/24)")
     parser.add_argument("-t", "--timeout", type=int, default=3)
     parser.add_argument("-v", "--verbose", action="store_true")
-    parser.add_argument("-i", "--interface", type=str, help="Network interface to use (optional)")
 
     args = parser.parse_args()
 
@@ -22,7 +21,7 @@ def main():
     start_time = time.time()
     
     try:
-        hosts = arp_scan(args.network, timeout=args.timeout, interface=args.interface)
+        hosts = arp_scan(args.network, timeout=args.timeout)
         scan_time = round(time.time() - start_time, 2)
 
         result = ScanResult(
