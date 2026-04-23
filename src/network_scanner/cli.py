@@ -36,14 +36,13 @@ def main():
         table.add_column("IP", style="cyan", no_wrap=True) 
         table.add_column("MAC", style="magenta", no_wrap=True)
         table.add_column("Vendor", style="spring_green3", overflow="fold")
-        table.add_column("Vendor", style="spring_green3", width=25, overflow="fold")
         table.add_column("OS Guess", style="gold3")
 
         for host in result.hosts:
             table.add_row(
                 host.ip,
-                host.mac or "-",
-                host.vendor or "-",
+                str(host.mac or "-").strip(),
+                str(host.vendor or "-").strip(),
                 host.os_guess or "-"
             )
 
