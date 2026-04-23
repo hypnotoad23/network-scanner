@@ -18,7 +18,7 @@ def main():
     args = parser.parse_args()
 
     console.print(f"[bold green] Run a network scan {args.network}...[/bold green]")
-    start_time = time.time()
+    start_time = time.perf_counter()
     
     try:
         hosts = arp_scan(args.network, timeout=args.timeout)
