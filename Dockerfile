@@ -6,10 +6,8 @@ WORKDIR /app
 
 COPY pyproject.toml poetry.lock ./
 
-RUN poetry config virtualenvs.create false \ 
+RUN poetry config virtualenvs.create false \
 	&& poetry install --no-interaction --no-ansi --no-root
-
-RUN poetry run python -c "from mac_vendor_lookup import MacLookup; MacLookup().update_vendors()"
 
 FROM python:3.12-slim
 
@@ -20,12 +18,11 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 
 COPY . .
 
-RUN pip install -e .
+RUN pip install .
 
 RUN apt-get update && apt-get install -y tcpdump && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /root/.cache/mac-vendor-lookup && \
 	python -c "from mac_vendor_lookup import MacLookup; MacLookup().update_vendors()"
-
 
 ENTRYPOINT ["netscan"]
