@@ -11,7 +11,7 @@ console = Console()
 
 
 def main():
-    """Run a network scan"""
+    # Начало сканирования 
     parser = argparse.ArgumentParser(description="Network Scanner CLI")
     parser.add_argument("network", help="Network range to scan (e.g., 192.168.1.0/24)")
     parser.add_argument("-t", "--timeout", type=int, default=3)
@@ -32,7 +32,7 @@ def main():
             hosts=hosts,
         )
 
-        # Create table
+        # Создание таблицы
         table = Table(title="Detected devices on the network", expand=False)
         table.add_column("IP", style="cyan", no_wrap=True)
         table.add_column("MAC", style="magenta", no_wrap=True)
@@ -40,8 +40,9 @@ def main():
         table.add_column("OS Guess", style="gold3")
 
         for host in result.hosts:
+            ip_display = f"{host.ip} (this device)" if host.is_local else str(host.ip)
             table.add_row(
-                str(host.ip),
+                ip_display,
                 str(host.mac or "-").strip(),
                 str(host.vendor or "-").strip(),
                 str(host.os_guess or "-").strip(),
