@@ -1,14 +1,19 @@
-from mac_vendor_lookup import MacLookup
+from mac_vendor_lookup import MacLookup, VendorNotFoundError
+
+UNKNOWN_VENDOR = "Unknown Vendor"
 
 lookup = MacLookup()
 lookup.async_update_vendors = False
 
+
 def get_vendor(mac: str) -> str:
-    """Determines the device manufacturer by MAC address"""
+    # Определение производителя устройства по MAC-адресу
     if not mac:
-        return "Unknown"
+        return UNKNOWN_VENDOR
+
     try:
         return lookup.lookup(mac)
-    except Exception:
-        return "Unknown Vendor"
-
+    except VendorNotFoundError:
+        return UNKNOWN_VENDOR
+    except FileNotFoundError:
+        return UNKNOWN_VENDOR

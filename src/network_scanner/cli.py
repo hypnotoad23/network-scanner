@@ -10,14 +10,42 @@ from network_scanner.scanners import arp_scan
 console = Console()
 
 
+def update_vendor_db() -> None:
+    # Скачивает/обновляет локальную базу MAC-вендоров (IEEE OUI)
+    from mac_vendor_lookup import MacLookup
+
+    console.print("[cyan]Updating vendor database...[/cyan]")
+    try:
+        MacLookup().update_vendors()
+        console.print("[bold green]Vendor database updated.[/bold green]")
+    except Exception as e:
+        console.print(f"[bold red]Failed to update vendor database: {e}[/bold red]")
+
+
 def main():
-    # Начало сканирования 
+    # Начало сканирования сети 
     parser = argparse.ArgumentParser(description="Network Scanner CLI")
-    parser.add_argument("network", help="Network range to scan (e.g., 192.168.1.0/24)")
+    parser.add_argument(
+        "network",
+        nargs="?",
+        help="Network range to scan (e.g., 192.168.1.0/24)",
+    )
     parser.add_argument("-t", "--timeout", type=int, default=3)
     parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument(
+        "--update-vendor-db",
+        action="store_true",
+        help="Update local MAC vendor database and exit",
+    )
 
     args = parser.parse_args()
+
+    if args.update_vendor_db:
+        update_vendor_db()
+        return
+
+    if not args.network:
+        parser.error("the following arguments are required: network")
 
     console.print(f"[bold green]Run a network scan {args.network}...[/bold green]")
     start_time = time.perf_counter()
@@ -32,7 +60,7 @@ def main():
             hosts=hosts,
         )
 
-        # Создание таблицы
+        # Создание таблицы 
         table = Table(title="Detected devices on the network", expand=False)
         table.add_column("IP", style="cyan", no_wrap=True)
         table.add_column("MAC", style="magenta", no_wrap=True)
