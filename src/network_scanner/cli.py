@@ -6,13 +6,13 @@ from rich.table import Table
 
 from network_scanner.core import Host, ScanResult
 from network_scanner.core.exception import NetworkScannerError
-from network_scanner.scanners import arp_scan
+from network_scanner.scanners import arp_scan, icmp_scan
 
 console = Console()
 
 
 def update_vendor_db() -> None:
-    # Скачивает/обновляет локальную базу MAC-вендоров (IEEE OUI)
+    # Скачивает/обновляет локальную базу MAC-вендоров (IEEE OUI).
     from mac_vendor_lookup import MacLookup
 
     console.print("[cyan]Updating vendor database...[/cyan]")
@@ -21,6 +21,22 @@ def update_vendor_db() -> None:
         console.print("[bold green]Vendor database updated.[/bold green]")
     except Exception as e:
         console.print(f"[bold red]Failed to update vendor database: {e}[/bold red]")
+
+
+def run_scan(network: str, detect_os: bool, timeout: int) -> list[Host]:
+    # Выполняет ARP-сканирование и, опционально, обогащает результат данными ICMP (TTL, OS Guess).
+    hosts = arp_scan(network, timeout=timeout)
+
+    if detect_os and hosts:
+        ips = [str(h.ip) for h in hosts]
+        icmp_hosts = {str(h.ip): h for h in icmp_scan(ips, timeout=timeout)}
+        for host in hosts:
+            icmp_match = icmp_hosts.get(str(host.ip))
+            if icmp_match:
+                host.ttl = icmp_match.ttl
+                host.os_guess = icmp_match.os_guess
+
+    return hosts
 
 
 def main():
@@ -33,6 +49,11 @@ def main():
     )
     parser.add_argument("-t", "--timeout", type=int, default=3)
     parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument(
+        "--os-detect",
+        action="store_true",
+        help="Дополнительно к ARP выполнить ICMP-сканирование для определения TTL/ОС",
+    )
     parser.add_argument(
         "--update-vendor-db",
         action="store_true",
@@ -52,7 +73,7 @@ def main():
     start_time = time.perf_counter()
 
     try:
-        hosts = arp_scan(args.network, timeout=args.timeout)
+        hosts = run_scan(args.network, args.os_detect, args.timeout)
         scan_time = round(time.perf_counter() - start_time, 2)
 
         result = ScanResult(
@@ -61,12 +82,11 @@ def main():
             hosts=hosts,
         )
 
-        # Создание таблицы (вывод)
         table = Table(title="Detected devices on the network", expand=False)
         table.add_column("IP", style="cyan", no_wrap=True)
         table.add_column("MAC", style="magenta", no_wrap=True)
         table.add_column("Vendor", style="spring_green3", overflow="fold")
-        table.add_column("OS Guess", style="gold3")
+        table.add_column("OS Guess", style="gold3", overflow="fold")
 
         for host in result.hosts:
             ip_display = f"{host.ip} (this device)" if host.is_local else str(host.ip)
@@ -84,7 +104,9 @@ def main():
         if args.verbose and hosts:
             console.print("\n[bold]Detailed information:[/bold]")
             for host in hosts:
-                console.print(f"    {str(host.ip):15}   MAC: {host.mac or 'N/A'}")
+                console.print(
+                    f"    {str(host.ip):15}   MAC: {host.mac or 'N/A':17}   TTL: {host.ttl or '-'}"
+                )
 
     except NetworkScannerError as e:
         console.print(f"[bold red]Error: {e}[/bold red]")

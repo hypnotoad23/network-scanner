@@ -1,3 +1,4 @@
 from .discovery import arp_scan
+from .icmp import icmp_scan
 
-__all__ = ["arp_scan"]
+__all__ = ["arp_scan", "icmp_scan"]
