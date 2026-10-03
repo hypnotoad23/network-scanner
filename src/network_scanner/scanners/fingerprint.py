@@ -4,10 +4,8 @@ TTL_LINUX_MACOS_ANDROID = 64
 TTL_WINDOWS = 128
 TTL_NETWORK_DEVICE = 255
 
-MACOS_WINDOW_SIZE_THRESHOLD = 60000
 
-
-def get_os_guess(ttl: Optional[int], window_size: Optional[int] = None) -> str:
+def get_os_guess(ttl: Optional[int]) -> str:
     """
     Приблизительное определение ОС хоста по начальному TTL из IP-заголовка.
 
@@ -22,10 +20,10 @@ def get_os_guess(ttl: Optional[int], window_size: Optional[int] = None) -> str:
     "эталонного" значения. Метод надёжен в первую очередь в пределах одной локальной
     подсети (0-1 хопов до цели) — именно так он используется в проекте.
 
-    Опциональный `window_size` (TCP window size из SYN-ACK, появится при добавлении
-    сканирования портов) используется как дополнительное уточнение между Linux/macOS/
-    Android. Сигнал слабый (современные ядра Linux тоже нередко используют большие
-    значения window size) и не должен считаться основным критерием.
+    Ранее здесь также учитывался TCP window size как дополнительный сигнал для
+    различения Linux/macOS/Android, но эвристика оказалась ненадёжной на практике
+    (embedded веб-серверы на роутерах нередко выставляют window size, совпадающий
+    с типичным для macOS) и была убрана — группа TTL=64 остаётся недифференцированной.
     """
     if ttl is None:
         return "Unknown"
@@ -42,13 +40,4 @@ def get_os_guess(ttl: Optional[int], window_size: Optional[int] = None) -> str:
         TTL_WINDOWS: "Windows",
         TTL_NETWORK_DEVICE: "Network Device (legacy Cisco IOS, Solaris, etc.)",
     }
-    os_name = os_guesses.get(initial_ttl, "Unknown")
-
-    if (
-        os_name.startswith("Linux / Android / macOS")
-        and window_size is not None
-        and window_size > MACOS_WINDOW_SIZE_THRESHOLD
-    ):
-        os_name = "macOS (likely)"
-
-    return os_name
+    return os_guesses.get(initial_ttl, "Unknown")

@@ -8,7 +8,7 @@ MAC_PATTERN = r"^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$"
 
 
 class Host(BaseModel):
-    # обнаруженное в сети устройство
+    # Модель одного обнаруженного устройства в сети
 
     ip: Union[IPv4Address, IPv6Address]
     mac: Optional[str] = None
@@ -16,6 +16,7 @@ class Host(BaseModel):
     hostname: Optional[str] = None
     os_guess: Optional[str] = None
     ttl: Optional[int] = Field(default=None, ge=0, le=255)
+    window_size: Optional[int] = Field(default=None, ge=0)
     open_ports: List[int] = Field(default_factory=list)
     is_local: bool = False
     last_seen: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -42,7 +43,7 @@ class Host(BaseModel):
 
 
 class ScanResult(BaseModel):
-    # Результат сканирования сети
+    # Результат полного сканирования сети
 
     network: Union[IPv4Network, IPv6Network]
     hosts: List[Host] = Field(default_factory=list)
