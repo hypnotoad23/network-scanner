@@ -7,13 +7,11 @@ lookup.async_update_vendors = False
 
 
 def get_vendor(mac: str) -> str:
-    # Определение производителя устройства по MAC-адресу
+# Определение производителя устройства по MAC-адресу
     if not mac:
         return UNKNOWN_VENDOR
 
     try:
         return lookup.lookup(mac)
-    except VendorNotFoundError:
-        return UNKNOWN_VENDOR
-    except FileNotFoundError:
+    except (VendorNotFoundError, FileNotFoundError, ValueError):
         return UNKNOWN_VENDOR

@@ -5,6 +5,7 @@ from rich.console import Console
 from rich.table import Table
 
 from network_scanner.core import Host, ScanResult
+from network_scanner.core.exception import NetworkScannerError
 from network_scanner.scanners import arp_scan
 
 console = Console()
@@ -23,7 +24,7 @@ def update_vendor_db() -> None:
 
 
 def main():
-    # Начало сканирования сети 
+    # Начало сканирования
     parser = argparse.ArgumentParser(description="Network Scanner CLI")
     parser.add_argument(
         "network",
@@ -60,7 +61,7 @@ def main():
             hosts=hosts,
         )
 
-        # Создание таблицы 
+        # Создание таблицы (вывод)
         table = Table(title="Detected devices on the network", expand=False)
         table.add_column("IP", style="cyan", no_wrap=True)
         table.add_column("MAC", style="magenta", no_wrap=True)
@@ -85,13 +86,10 @@ def main():
             for host in hosts:
                 console.print(f"    {str(host.ip):15}   MAC: {host.mac or 'N/A'}")
 
-    except PermissionError:
-        console.print(
-            "[bold red]Error: недостаточно прав для ARP-сканирования. "
-            "Запустите с sudo/от администратора.[/bold red]"
-        )
-    except Exception as e:
+    except NetworkScannerError as e:
         console.print(f"[bold red]Error: {e}[/bold red]")
+    except Exception as e:
+        console.print(f"[bold red]Unexpected error: {e}[/bold red]")
         if args.verbose:
             console.print_exception()
 

@@ -4,6 +4,7 @@ from typing import List, Optional
 from rich.progress import Progress
 from scapy.all import ARP, Ether, conf, get_if_hwaddr, srp
 
+from ..core.exception import ScanPermissionError
 from ..core.models import Host
 from ..utils.mac_vendor import get_vendor
 
@@ -13,7 +14,7 @@ conf.sniff_promisc = True
 
 
 def _get_local_host(target_ip: str, iface: Optional[str] = None) -> Optional[Host]:
-    """Определяет IP/MAC собственного ПК на интерфейсе, через который достижима target_ip."""
+    # Определяет IP/MAC собственной машины на интерфейсе, через который достижима target_ip
     try:
         network_addr = target_ip.split("/")[0]
         used_iface, src_ip, _ = conf.route.route(network_addr)
@@ -27,17 +28,23 @@ def _get_local_host(target_ip: str, iface: Optional[str] = None) -> Optional[Hos
 
 
 def arp_scan(target_ip: str, timeout: int = 3, iface: Optional[str] = None) -> List[Host]:
-    # Выполняет ARP-сканирование подсети.
+    # Выполняет ARP-сканирование подсети
     arp_request = ARP(pdst=target_ip)
     broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
     packet = broadcast / arp_request
 
     hosts: List[Host] = []
 
-    with Progress() as progress:
-        task = progress.add_task("[cyan]Scanning...", total=None)
-        answered, _ = srp(packet, timeout=timeout, iface=iface, verbose=False)
-        progress.update(task, completed=100)
+    try:
+        with Progress() as progress:
+            task = progress.add_task("[cyan]Scanning...", total=None)
+            answered, _ = srp(packet, timeout=timeout, iface=iface, verbose=False)
+            progress.update(task, completed=100)
+    except PermissionError as e:
+        raise ScanPermissionError(
+            "Недостаточно прав для отправки raw-пакетов. "
+            "Запустите с sudo (Linux) или от администратора (Windows)."
+        ) from e
 
     for _, received in answered:
         ip_addr = received.psrc
@@ -50,7 +57,7 @@ def arp_scan(target_ip: str, timeout: int = 3, iface: Optional[str] = None) -> L
 
         hosts.append(Host(ip=ip_addr, mac=mac_addr, vendor=vendor_name))
 
-    # ПК  пользователя 
+    # Добавляем/помечаем собственную машину — ARP не всегда отвечает сама себе
     local_host = _get_local_host(target_ip, iface=iface)
     if local_host:
         existing = next((h for h in hosts if str(h.ip) == str(local_host.ip)), None)
